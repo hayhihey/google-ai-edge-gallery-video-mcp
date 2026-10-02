@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.edge_ai_video/
+output/
+*.log
+.env
+.DS_Store
+Thumbs.db
+coverage/

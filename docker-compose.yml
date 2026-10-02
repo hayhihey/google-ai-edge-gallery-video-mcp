@@ -1,0 +1,15 @@
+services:
+  edge-video-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: google-ai-edge-gallery-video-mcp:latest
+    container_name: edge-video-mcp
+    restart: unless-stopped
+    volumes:
+      - ./output:/app/output
+      - /dev/bus/usb:/dev/bus/usb # For USB ADB device access if running on Linux host
+    privileged: true
+    environment:
+      - NODE_ENV=production
+      - EDGE_MCP_OUTPUT_DIR=/app/output

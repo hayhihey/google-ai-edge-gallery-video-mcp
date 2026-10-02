@@ -1,0 +1,54 @@
+{
+  "name": "google-ai-edge-gallery-video-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server for Google AI Edge Gallery video creation, running on-device on Android (Termux), ADB bridge, or Desktop.",
+  "main": "dist/index.js",
+  "bin": {
+    "google-ai-edge-gallery-video-mcp": "./dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "google-ai-edge",
+    "google-ai-edge-gallery",
+    "android",
+    "termux",
+    "video-creation",
+    "mediapipe",
+    "litert",
+    "edge-ai",
+    "ffmpeg",
+    "gemma"
+  ],
+  "author": "Google AI Edge Community",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "scripts",
+    "README.md",
+    "LICENSE"
+  ]
+}

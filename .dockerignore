@@ -1,0 +1,7 @@
+node_modules
+dist
+.edge_ai_video
+output
+*.log
+.git
+.env
