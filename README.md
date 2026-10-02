@@ -1,6 +1,6 @@
 # Google AI Edge Gallery Video MCP Server 🎬📱
 
-[![CI](https://github.com/google-ai-edge/google-ai-edge-gallery-video-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/google-ai-edge/google-ai-edge-gallery-video-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/hayhihey/google-ai-edge-gallery-video-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/hayhihey/google-ai-edge-gallery-video-mcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Linux%20%7C%20macOS%20%7C%20Windows-green.svg)](#supported-platforms)
 [![MCP](https://img.shields.io/badge/MCP-Protocol%20v1.6-purple.svg)](https://modelcontextprotocol.io)
@@ -66,7 +66,7 @@ Built from the ground up to **run natively on Android devices (via Termux)**, th
 Run this one-line command inside [Termux](https://f-droid.org/en/packages/com.termux/):
 
 ```bash
-pkg install -y curl && curl -sSL https://raw.githubusercontent.com/google-ai-edge/google-ai-edge-gallery-video-mcp/main/scripts/termux-install.sh | bash
+pkg install -y curl && curl -sSL https://raw.githubusercontent.com/hayhihey/google-ai-edge-gallery-video-mcp/main/scripts/termux-install.sh | bash
 ```
 
 Once installed, simply start the server:

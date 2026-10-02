@@ -2,7 +2,7 @@
 # ==============================================================================
 # Google AI Edge Gallery Video MCP - Android Termux Automated Installer
 # Run on Android inside Termux:
-#   curl -sSL https://raw.githubusercontent.com/google-ai-edge/google-ai-edge-gallery-video-mcp/main/scripts/termux-install.sh | bash
+#   curl -sSL https://raw.githubusercontent.com/hayhihey/google-ai-edge-gallery-video-mcp/main/scripts/termux-install.sh | bash
 # ==============================================================================
 
 set -e
@@ -31,7 +31,7 @@ if [ -d "$INSTALL_DIR" ]; then
     git pull || true
 else
     echo "Cloning repository..."
-    git clone https://github.com/google-ai-edge/google-ai-edge-gallery-video-mcp.git "$INSTALL_DIR" || {
+    git clone https://github.com/hayhihey/google-ai-edge-gallery-video-mcp.git "$INSTALL_DIR" || {
         echo "Local fallback directory..."
         mkdir -p "$INSTALL_DIR"
     }
