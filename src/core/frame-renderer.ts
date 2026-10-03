@@ -1,6 +1,6 @@
 /**
  * Google AI Edge Gallery Video MCP - Keyframe Generator & Frame Renderer
- * Generates stylized, production-ready keyframe assets with typography, cinematic gradients, and edge graphics.
+ * Generates universal, high-performance PPM keyframes compatible with 100% of FFmpeg builds.
  */
 
 import fs from 'fs';
@@ -28,19 +28,17 @@ export class FrameRenderer {
     const results: GeneratedKeyframe[] = [];
 
     for (const shot of storyboard.shots) {
-      // Check if user provided custom image for this shot
       if (customKeyframeMap && customKeyframeMap[shot.id] && fs.existsSync(customKeyframeMap[shot.id])) {
         results.push({
           shotId: shot.id,
           filePath: customKeyframeMap[shot.id],
-          isSvg: customKeyframeMap[shot.id].endsWith('.svg'),
+          isSvg: false,
           width: storyboard.resolution.width,
           height: storyboard.resolution.height
         });
         continue;
       }
 
-      // Generate procedural cinematic keyframe
       const keyframePath = this.generateProceduralKeyframe(
         shot, 
         storyboard.resolution, 
@@ -50,7 +48,7 @@ export class FrameRenderer {
       results.push({
         shotId: shot.id,
         filePath: keyframePath,
-        isSvg: true,
+        isSvg: false,
         width: storyboard.resolution.width,
         height: storyboard.resolution.height
       });
@@ -60,7 +58,7 @@ export class FrameRenderer {
   }
 
   /**
-   * Generates a modern, high-aesthetic SVG keyframe card
+   * Generates a smooth, high-fidelity PPM keyframe image
    */
   public static generateProceduralKeyframe(
     shot: SceneShot, 
@@ -68,135 +66,68 @@ export class FrameRenderer {
     storyboardId: string
   ): string {
     const { width, height } = resolution;
-    const isPortrait = height > width;
-
-    // Palette selection based on shot color grade
-    const palettes = this.getColorPalettes(shot.colorGrade, shot.order);
-    const fileName = `${storyboardId}_${shot.id}.svg`;
+    const fileName = `${storyboardId}_${shot.id}.ppm`;
     const outputPath = path.join(Config.FRAMES_DIR, fileName);
 
-    const titleEscaped = this.escapeXml(shot.title);
-    const promptEscaped = this.escapeXml(shot.visualPrompt);
-    const captionEscaped = this.escapeXml(shot.captionText || '');
+    const palettes = this.getColorPalettes(shot.colorGrade, shot.order);
 
-    const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <!-- Background Gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${palettes.primary}" />
-      <stop offset="50%" stop-color="${palettes.secondary}" />
-      <stop offset="100%" stop-color="${palettes.dark}" />
-    </linearGradient>
+    // PPM P6 header
+    const header = Buffer.from(`P6\n${width} ${height}\n255\n`);
+    const data = Buffer.alloc(width * height * 3);
 
-    <!-- Edge Glow Effect -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="18" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
+    const cx = width / 2;
+    const cy = height * 0.45;
+    const maxDist = Math.sqrt(cx * cx + cy * cy);
 
-    <radialGradient id="meshCenter" cx="50%" cy="40%" r="50%">
-      <stop offset="0%" stop-color="${palettes.accent}" stop-opacity="0.35" />
-      <stop offset="100%" stop-color="${palettes.dark}" stop-opacity="0" />
-    </radialGradient>
-  </defs>
+    for (let y = 0; y < height; y++) {
+      const yRatio = y / height;
+      for (let x = 0; x < width; x++) {
+        const xRatio = x / width;
+        const idx = (y * width + x) * 3;
 
-  <!-- Base Dark Canvas -->
-  <rect width="${width}" height="${height}" fill="#0A0D14" />
-  
-  <!-- Dynamic Gradient Backdrop -->
-  <rect width="${width}" height="${height}" fill="url(#bgGrad)" opacity="0.85" />
-  <rect width="${width}" height="${height}" fill="url(#meshCenter)" />
+        // Radial glow calculation
+        const dx = x - cx;
+        const dy = y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
+        const glow = Math.max(0, 1 - dist * 1.8);
 
-  <!-- Futuristic Geometric Framing (Edge AI Graphic Motif) -->
-  <g opacity="0.25" stroke="${palettes.accent}" stroke-width="1.5" fill="none">
-    <circle cx="${width / 2}" cy="${height / 2}" r="${Math.min(width, height) * 0.38}" />
-    <circle cx="${width / 2}" cy="${height / 2}" r="${Math.min(width, height) * 0.44}" stroke-dasharray="12 8" />
-    <line x1="${width * 0.1}" y1="${height * 0.1}" x2="${width * 0.9}" y2="${height * 0.1}" />
-    <line x1="${width * 0.1}" y1="${height * 0.9}" x2="${width * 0.9}" y2="${height * 0.9}" />
-  </g>
+        // Gradient interpolation
+        let r = palettes.r1 * (1 - yRatio) + palettes.r2 * yRatio + glow * 80;
+        let g = palettes.g1 * (1 - xRatio) + palettes.g2 * xRatio + glow * 80;
+        let b = palettes.b1 * (1 - yRatio) + palettes.b2 * yRatio + glow * 100;
 
-  <!-- Top Edge AI Status Badge -->
-  <g transform="translate(${width * 0.08}, ${isPortrait ? height * 0.08 : height * 0.07})">
-    <rect width="${isPortrait ? 280 : 320}" height="42" rx="21" fill="#141923" fill-opacity="0.85" stroke="${palettes.accent}" stroke-width="1" />
-    <circle cx="24" cy="21" r="6" fill="${palettes.accent}" filter="url(#glow)" />
-    <text x="42" y="27" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF" letter-spacing="1.5">
-      GOOGLE AI EDGE • ${shot.id.toUpperCase()}
-    </text>
-  </g>
+        // Vignette falloff
+        const vig = 1 - (dist * 0.5);
+        r *= vig;
+        g *= vig;
+        b *= vig;
 
-  <!-- Hero Visual Centerpiece -->
-  <g transform="translate(${width / 2}, ${isPortrait ? height * 0.45 : height * 0.48})" text-anchor="middle">
-    <!-- Center Orb / Model Visualizer -->
-    <circle cx="0" cy="0" r="${isPortrait ? 130 : 110}" fill="${palettes.accent}" fill-opacity="0.15" filter="url(#glow)" />
-    <polygon points="0,-70 60,35 -60,35" fill="${palettes.accent}" fill-opacity="0.4" />
-    <polygon points="0,70 60,-35 -60,-35" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.6" />
+        data[idx] = Math.min(255, Math.max(0, Math.floor(r)));
+        data[idx + 1] = Math.min(255, Math.max(0, Math.floor(g)));
+        data[idx + 2] = Math.min(255, Math.max(0, Math.floor(b)));
+      }
+    }
 
-    <!-- Scene Title -->
-    <text y="${isPortrait ? 190 : 160}" font-family="system-ui, -apple-system, sans-serif" font-size="${isPortrait ? 44 : 40}" font-weight="800" fill="#FFFFFF">
-      ${titleEscaped}
-    </text>
-
-    <!-- Visual Description -->
-    <text y="${isPortrait ? 240 : 205}" font-family="system-ui, -apple-system, sans-serif" font-size="${isPortrait ? 20 : 18}" font-weight="400" fill="#CBD5E1" opacity="0.9">
-      ${promptEscaped.substring(0, 50)}${promptEscaped.length > 50 ? '...' : ''}
-    </text>
-  </g>
-
-  <!-- Bottom Captions / Lower Third -->
-  ${captionEscaped ? `
-  <g transform="translate(${width * 0.08}, ${isPortrait ? height * 0.82 : height * 0.78})">
-    <rect width="${width * 0.84}" height="${isPortrait ? 85 : 75}" rx="16" fill="#0F172A" fill-opacity="0.85" stroke="#334155" stroke-width="1.5" />
-    <text x="${(width * 0.84) / 2}" y="${isPortrait ? 52 : 46}" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="${isPortrait ? 24 : 22}" font-weight="800" fill="#38BDF8" letter-spacing="1">
-      ${captionEscaped}
-    </text>
-  </g>
-  ` : ''}
-
-  <!-- Watermark / Footer -->
-  <text x="${width / 2}" y="${height - 25}" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#64748B" letter-spacing="2">
-    ON-DEVICE INFERENCE • GOOGLE AI EDGE GALLERY
-  </text>
-</svg>`;
-
-    fs.writeFileSync(outputPath, svgContent, 'utf8');
+    fs.writeFileSync(outputPath, Buffer.concat([header, data]));
     return outputPath;
   }
 
   private static getColorPalettes(grade: string, index: number) {
-    const shift = (index * 45) % 360;
+    const shift = (index * 40) % 255;
 
     switch (grade) {
       case 'cinematic_teal_orange':
-        return { primary: '#0A2540', secondary: '#1E3A8A', accent: '#F97316', dark: '#030712' };
+        return { r1: 10, g1: 37, b1: 64, r2: 249, g2: 115, b2: 22 };
       case 'cyberpunk_neon':
-        return { primary: '#3B0764', secondary: '#4C1D95', accent: '#06B6D4', dark: '#020617' };
+        return { r1: 59, g1: 7, b1: 100, r2: 6, g2: 182, b2: 212 };
       case 'vivid_pop':
-        return { primary: '#1E1B4B', secondary: '#4338CA', accent: '#EC4899', dark: '#09090B' };
+        return { r1: 30, g1: 27, b1: 75, r2: 236, g2: 72, b2: 153 };
       case 'vintage_warm':
-        return { primary: '#451A03', secondary: '#78350F', accent: '#FBBF24', dark: '#1C1917' };
+        return { r1: 69, g1: 26, b1: 3, r2: 251, g2: 191, b2: 36 };
       case 'noir_monochrome':
-        return { primary: '#18181B', secondary: '#27272A', accent: '#E4E4E7', dark: '#09090B' };
+        return { r1: 20, g1: 20, b1: 24, r2: 210, g2: 210, b2: 215 };
       default:
-        return { 
-          primary: `hsl(${220 + shift}, 60%, 15%)`, 
-          secondary: `hsl(${240 + shift}, 70%, 25%)`, 
-          accent: '#38BDF8', 
-          dark: '#030712' 
-        };
+        return { r1: 15, g1: 23, b1: 42, r2: (56 + shift) % 255, g2: 189, b2: 248 };
     }
-  }
-
-  private static escapeXml(unsafe: string): string {
-    return unsafe.replace(/[<>&'"]/g, (c) => {
-      switch (c) {
-        case '<': return '&lt;';
-        case '>': return '&gt;';
-        case '&': return '&amp;';
-        case '\'': return '&apos;';
-        case '"': return '&quot;';
-        default: return c;
-      }
-    });
   }
 }

@@ -1,6 +1,6 @@
 /**
  * Google AI Edge Gallery Video MCP - Keyframe Generator & Frame Renderer
- * Generates stylized, production-ready keyframe assets with typography, cinematic gradients, and edge graphics.
+ * Generates universal, high-performance PPM keyframes compatible with 100% of FFmpeg builds.
  */
 import { SceneShot, VideoStoryboard, VideoResolution } from './types.js';
 export interface GeneratedKeyframe {
@@ -16,9 +16,8 @@ export declare class FrameRenderer {
      */
     static renderStoryboardKeyframes(storyboard: VideoStoryboard, customKeyframeMap?: Record<string, string>): Promise<GeneratedKeyframe[]>;
     /**
-     * Generates a modern, high-aesthetic SVG keyframe card
+     * Generates a smooth, high-fidelity PPM keyframe image
      */
     static generateProceduralKeyframe(shot: SceneShot, resolution: VideoResolution, storyboardId: string): string;
     private static getColorPalettes;
-    private static escapeXml;
 }

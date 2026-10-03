@@ -6,9 +6,21 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import ffmpegStatic from 'ffmpeg-static';
 import { AspectRatio, VideoResolution } from './core/types.js';
 
 dotenv.config();
+
+// Resolve FFmpeg binary
+let resolvedFfmpeg = 'ffmpeg';
+try {
+  const staticPath = (ffmpegStatic as unknown as string) || (ffmpegStatic as any)?.default;
+  if (typeof staticPath === 'string' && fs.existsSync(staticPath)) {
+    resolvedFfmpeg = staticPath;
+  }
+} catch {
+  // fallback to system ffmpeg
+}
 
 export class Config {
   // Environment Flags
@@ -43,7 +55,7 @@ export class Config {
     path.join(Config.BASE_WORK_DIR, 'models');
 
   // Binary Paths
-  public static readonly FFMPEG_PATH = process.env.FFMPEG_PATH || (Config.IS_TERMUX ? 'ffmpeg' : 'ffmpeg');
+  public static readonly FFMPEG_PATH = process.env.FFMPEG_PATH || (Config.IS_TERMUX ? 'ffmpeg' : resolvedFfmpeg);
   public static readonly ADB_PATH = process.env.ADB_PATH || 'adb';
 
   // Video Resolutions Mapping

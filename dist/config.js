@@ -5,7 +5,19 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import ffmpegStatic from 'ffmpeg-static';
 dotenv.config();
+// Resolve FFmpeg binary
+let resolvedFfmpeg = 'ffmpeg';
+try {
+    const staticPath = ffmpegStatic || ffmpegStatic?.default;
+    if (typeof staticPath === 'string' && fs.existsSync(staticPath)) {
+        resolvedFfmpeg = staticPath;
+    }
+}
+catch {
+    // fallback to system ffmpeg
+}
 export class Config {
     // Environment Flags
     static IS_TERMUX = Boolean(process.env.TERMUX_VERSION ||
@@ -30,7 +42,7 @@ export class Config {
     static MODELS_CACHE_DIR = process.env.EDGE_MCP_MODELS_DIR ||
         path.join(Config.BASE_WORK_DIR, 'models');
     // Binary Paths
-    static FFMPEG_PATH = process.env.FFMPEG_PATH || (Config.IS_TERMUX ? 'ffmpeg' : 'ffmpeg');
+    static FFMPEG_PATH = process.env.FFMPEG_PATH || (Config.IS_TERMUX ? 'ffmpeg' : resolvedFfmpeg);
     static ADB_PATH = process.env.ADB_PATH || 'adb';
     // Video Resolutions Mapping
     static getResolution(aspectRatio, isMobileConstrained = false) {

@@ -23,7 +23,7 @@ export class VideoCompiler {
      */
     async isFfmpegAvailable() {
         try {
-            const { stdout, stderr } = await execAsync(`${this.ffmpegBin} -version`);
+            const { stdout, stderr } = await execAsync(`"${this.ffmpegBin}" -version`);
             return stdout.includes('ffmpeg version') || stderr.includes('ffmpeg version');
         }
         catch {
@@ -131,7 +131,7 @@ export class VideoCompiler {
             filterGraph = FxPipeline.buildShotFilterGraph(shot.cameraMotion, shot.colorGrade, resolution, duration, fps);
         }
         // Android-friendly H.264 Main profile encoding
-        const cmd = `${this.ffmpegBin} -y -loop 1 -t ${duration} -i "${keyframe.filePath}" ` +
+        const cmd = `"${this.ffmpegBin}" -y -loop 1 -t ${duration} -i "${keyframe.filePath}" ` +
             `-vf "${filterGraph},format=yuv420p" ` +
             `-c:v libx264 -preset ultrafast -tune stillimage -profile:v main -level 3.1 ` +
             `-r ${fps} -pix_fmt yuv420p "${outputPath}"`;
@@ -140,7 +140,7 @@ export class VideoCompiler {
         }
         catch (err) {
             // Fallback: simpler filter if complex zoompan fails
-            const fallbackCmd = `${this.ffmpegBin} -y -loop 1 -t ${duration} -i "${keyframe.filePath}" ` +
+            const fallbackCmd = `"${this.ffmpegBin}" -y -loop 1 -t ${duration} -i "${keyframe.filePath}" ` +
                 `-vf "scale=${width}:${height},format=yuv420p" ` +
                 `-c:v libx264 -preset ultrafast -profile:v baseline ` +
                 `-r ${fps} -pix_fmt yuv420p "${outputPath}"`;
@@ -158,12 +158,12 @@ export class VideoCompiler {
         let cmd;
         if (includeAudio) {
             // Synthesize ambient drone score (Edge AI aesthetic soundbed) using FFmpeg lavfi audio
-            cmd = `${this.ffmpegBin} -y -f concat -safe 0 -i "${concatListPath}" ` +
+            cmd = `"${this.ffmpegBin}" -y -f concat -safe 0 -i "${concatListPath}" ` +
                 `-f lavfi -i "anoisesrc=d=${targetDuration}:c=pink:r=44100:a=0.015,lowpass=f=400,volume=1.5" ` +
                 `-c:v copy -c:a aac -b:a 128k -shortest -movflags +faststart "${outputPath}"`;
         }
         else {
-            cmd = `${this.ffmpegBin} -y -f concat -safe 0 -i "${concatListPath}" ` +
+            cmd = `"${this.ffmpegBin}" -y -f concat -safe 0 -i "${concatListPath}" ` +
                 `-c:v copy -movflags +faststart "${outputPath}"`;
         }
         try {
@@ -171,7 +171,7 @@ export class VideoCompiler {
         }
         catch {
             // Fallback without audio filter if anoisesrc is unavailable
-            const fallbackCmd = `${this.ffmpegBin} -y -f concat -safe 0 -i "${concatListPath}" ` +
+            const fallbackCmd = `"${this.ffmpegBin}" -y -f concat -safe 0 -i "${concatListPath}" ` +
                 `-c:v copy -movflags +faststart "${outputPath}"`;
             await execAsync(fallbackCmd);
         }
