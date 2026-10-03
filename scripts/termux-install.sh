@@ -39,7 +39,11 @@ else
 fi
 
 npm install --omit=dev
-npm run build
+
+if [ ! -f "dist/index.js" ]; then
+    npm install
+    npx tsc || true
+fi
 
 echo "⚙️ [5/5] Creating global launcher command 'edge-video-mcp'..."
 BIN_PATH="$PREFIX/bin/edge-video-mcp"
