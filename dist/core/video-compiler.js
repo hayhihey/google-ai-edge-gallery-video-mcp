@@ -130,20 +130,22 @@ export class VideoCompiler {
         if (applyMotion) {
             filterGraph = FxPipeline.buildShotFilterGraph(shot.cameraMotion, shot.colorGrade, resolution, duration, fps);
         }
-        // Android-friendly H.264 Main profile encoding
-        const cmd = `"${this.ffmpegBin}" -y -loop 1 -t ${duration} -i "${keyframe.filePath}" ` +
+        // For zoompan (motion), supply keyframe once without -loop 1 so FFmpeg generates exactly the requested frames.
+        // For static holds, use -loop 1 to repeat the single image.
+        const inputArg = applyMotion ? `-i "${keyframe.filePath}"` : `-loop 1 -t ${duration} -i "${keyframe.filePath}"`;
+        const cmd = `"${this.ffmpegBin}" -y ${inputArg} ` +
             `-vf "${filterGraph},format=yuv420p" ` +
-            `-c:v libx264 -preset ultrafast -tune stillimage -profile:v main -level 3.1 ` +
-            `-r ${fps} -pix_fmt yuv420p "${outputPath}"`;
+            `-c:v libx264 -preset ultrafast -tune stillimage -profile:v baseline ` +
+            `-t ${duration} -r ${fps} -pix_fmt yuv420p "${outputPath}"`;
         try {
             await execAsync(cmd);
         }
         catch (err) {
-            // Fallback: simpler filter if complex zoompan fails
+            // Fallback: simpler static filter if complex zoompan fails
             const fallbackCmd = `"${this.ffmpegBin}" -y -loop 1 -t ${duration} -i "${keyframe.filePath}" ` +
                 `-vf "scale=${width}:${height},format=yuv420p" ` +
                 `-c:v libx264 -preset ultrafast -profile:v baseline ` +
-                `-r ${fps} -pix_fmt yuv420p "${outputPath}"`;
+                `-t ${duration} -r ${fps} -pix_fmt yuv420p "${outputPath}"`;
             await execAsync(fallbackCmd);
         }
     }

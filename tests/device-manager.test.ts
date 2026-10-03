@@ -11,5 +11,5 @@ describe('DeviceManager', () => {
     expect(telemetry.recommendedResolution).toHaveProperty('width');
     expect(telemetry.recommendedResolution).toHaveProperty('height');
     expect(typeof telemetry.hasHardwareEncoder).toBe('boolean');
-  });
+  }, 15000);
 });

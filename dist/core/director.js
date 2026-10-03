@@ -9,11 +9,11 @@ export class StoryboardDirector {
      */
     static planStoryboard(options) {
         const aspectRatio = options.aspectRatio || '9:16';
-        const targetDuration = options.targetDurationSeconds || 15;
+        const targetDuration = options.targetDurationSeconds || 6;
         const style = options.style || (aspectRatio === '9:16' ? 'social_reel' : 'cinematic');
         const resolution = Config.getResolution(aspectRatio, options.isMobileConstrained);
-        // Calculate optimal shot count (typically 3-5 seconds per shot for dynamic video)
-        const shotsCount = options.shotsCount || Math.max(3, Math.min(8, Math.round(targetDuration / 4)));
+        // Calculate optimal shot count (2-3 seconds per shot for snappy mobile edge video)
+        const shotsCount = options.shotsCount || Math.max(2, Math.min(5, Math.round(targetDuration / 3)));
         const durationPerShot = parseFloat((targetDuration / shotsCount).toFixed(1));
         const id = `sb_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         const title = options.title || this.extractTitleFromPrompt(options.prompt);

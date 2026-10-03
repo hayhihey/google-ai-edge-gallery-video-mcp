@@ -29,7 +29,7 @@ export class ToolDefinitions {
     prompt: z.string().describe('The creative concept, prompt, or script for the video'),
     title: z.string().optional().describe('Optional custom title for the video'),
     aspectRatio: z.enum(['9:16', '16:9', '1:1', '4:3']).default('9:16').describe('Aspect ratio: 9:16 (vertical reel/short), 16:9 (landscape/widescreen), 1:1 (square)'),
-    targetDurationSeconds: z.number().min(3).max(120).default(12).describe('Total video duration in seconds (3 - 120s)'),
+    targetDurationSeconds: z.number().min(3).max(60).default(6).describe('Total video duration in seconds (default 6s for fast mobile edge synthesis)'),
     style: z.enum(['cinematic', 'social_reel', 'documentary', 'cyberpunk', 'minimalist']).default('social_reel').describe('Visual aesthetic and camera motion style'),
     addBackgroundScore: z.boolean().default(true).describe('Synthesize ambient Edge AI background soundtrack'),
     applyMotionFx: z.boolean().default(true).describe('Apply Ken Burns dynamic camera motion (pan/tilt/zoom)'),

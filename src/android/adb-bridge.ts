@@ -29,7 +29,7 @@ export class AdbBridge {
    */
   public async isAdbAvailable(): Promise<boolean> {
     try {
-      const { stdout } = await execAsync(`${this.adbCmd} version`);
+      const { stdout } = await execAsync(`${this.adbCmd} version`, { timeout: 2000 });
       return stdout.includes('Android Debug Bridge');
     } catch {
       return false;

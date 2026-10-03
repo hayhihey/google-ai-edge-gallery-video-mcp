@@ -79,32 +79,43 @@ export class FrameRenderer {
     const cy = height * 0.45;
     const maxDist = Math.sqrt(cx * cx + cy * cy);
 
+    // Precalculate row distances for blazing fast generation
+    const dySquares = new Float32Array(height);
+    const yRatios = new Float32Array(height);
     for (let y = 0; y < height; y++) {
-      const yRatio = y / height;
-      for (let x = 0; x < width; x++) {
-        const xRatio = x / width;
-        const idx = (y * width + x) * 3;
+      const dy = y - cy;
+      dySquares[y] = dy * dy;
+      yRatios[y] = y / height;
+    }
 
-        // Radial glow calculation
-        const dx = x - cx;
-        const dy = y - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
+    const dxSquares = new Float32Array(width);
+    const xRatios = new Float32Array(width);
+    for (let x = 0; x < width; x++) {
+      const dx = x - cx;
+      dxSquares[x] = dx * dx;
+      xRatios[x] = x / width;
+    }
+
+    let ptr = 0;
+    for (let y = 0; y < height; y++) {
+      const yRatio = yRatios[y];
+      const dy2 = dySquares[y];
+      const baseR = palettes.r1 * (1 - yRatio) + palettes.r2 * yRatio;
+      const baseB = palettes.b1 * (1 - yRatio) + palettes.b2 * yRatio;
+
+      for (let x = 0; x < width; x++) {
+        const xRatio = xRatios[x];
+        const dist = Math.sqrt(dxSquares[x] + dy2) / maxDist;
         const glow = Math.max(0, 1 - dist * 1.8);
 
-        // Gradient interpolation
-        let r = palettes.r1 * (1 - yRatio) + palettes.r2 * yRatio + glow * 80;
+        let r = baseR + glow * 80;
         let g = palettes.g1 * (1 - xRatio) + palettes.g2 * xRatio + glow * 80;
-        let b = palettes.b1 * (1 - yRatio) + palettes.b2 * yRatio + glow * 100;
+        let b = baseB + glow * 100;
 
-        // Vignette falloff
-        const vig = 1 - (dist * 0.5);
-        r *= vig;
-        g *= vig;
-        b *= vig;
-
-        data[idx] = Math.min(255, Math.max(0, Math.floor(r)));
-        data[idx + 1] = Math.min(255, Math.max(0, Math.floor(g)));
-        data[idx + 2] = Math.min(255, Math.max(0, Math.floor(b)));
+        const vig = Math.max(0.2, 1 - (dist * 0.5));
+        data[ptr++] = Math.min(255, Math.floor(r * vig));
+        data[ptr++] = Math.min(255, Math.floor(g * vig));
+        data[ptr++] = Math.min(255, Math.floor(b * vig));
       }
     }
 

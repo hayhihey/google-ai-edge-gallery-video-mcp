@@ -47,28 +47,20 @@ export class Config {
     // Video Resolutions Mapping
     static getResolution(aspectRatio, isMobileConstrained = false) {
         if (isMobileConstrained) {
-            // Lower power / faster encoding for battery-constrained mobile edge runs
+            // Responsive 720p for mobile edge synthesis
             switch (aspectRatio) {
-                case '9:16':
-                    return { width: 720, height: 1280 };
-                case '16:9':
-                    return { width: 1280, height: 720 };
-                case '1:1':
-                    return { width: 720, height: 720 };
-                case '4:3':
-                    return { width: 960, height: 720 };
+                case '9:16': return { width: 720, height: 1280 };
+                case '16:9': return { width: 1280, height: 720 };
+                case '1:1': return { width: 720, height: 720 };
+                case '4:3': return { width: 960, height: 720 };
             }
         }
-        // High Quality standard
+        // High Quality 1080p standard
         switch (aspectRatio) {
-            case '9:16':
-                return { width: 1080, height: 1920 };
-            case '16:9':
-                return { width: 1920, height: 1080 };
-            case '1:1':
-                return { width: 1080, height: 1080 };
-            case '4:3':
-                return { width: 1440, height: 1080 };
+            case '9:16': return { width: 1080, height: 1920 };
+            case '16:9': return { width: 1920, height: 1080 };
+            case '1:1': return { width: 1080, height: 1080 };
+            case '4:3': return { width: 1440, height: 1080 };
         }
     }
     // Ensure working directories exist

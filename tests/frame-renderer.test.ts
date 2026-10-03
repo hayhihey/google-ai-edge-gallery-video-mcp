@@ -15,13 +15,12 @@ describe('FrameRenderer', () => {
     const keyframes = await FrameRenderer.renderStoryboardKeyframes(storyboard);
 
     expect(keyframes).toHaveLength(2);
-    expect(keyframes[0].isSvg).toBe(true);
     expect(fs.existsSync(keyframes[0].filePath)).toBe(true);
+    expect(keyframes[0].filePath.endsWith('.ppm')).toBe(true);
 
-    const content = fs.readFileSync(keyframes[0].filePath, 'utf8');
-    expect(content).toContain('<svg');
-    expect(content).toContain('GOOGLE AI EDGE');
-    expect(content).toContain('viewBox="0 0 1080 1920"');
+    const buffer = fs.readFileSync(keyframes[0].filePath);
+    expect(buffer.toString('ascii', 0, 2)).toBe('P6');
+    expect(buffer.length).toBeGreaterThan(1000);
 
     // Clean up test file
     try {
