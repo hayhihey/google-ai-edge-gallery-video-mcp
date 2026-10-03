@@ -43,8 +43,8 @@ export function createServerInstance() {
                             },
                             targetDurationSeconds: {
                                 type: 'number',
-                                default: 12,
-                                description: 'Total video length in seconds (3 - 120s)'
+                                default: 6,
+                                description: 'Total video length in seconds (3 - 8s; longer values are capped to 8s for fast on-device creation)'
                             },
                             style: {
                                 type: 'string',
@@ -177,7 +177,12 @@ export function createServerInstance() {
                 case 'edge_video_create': {
                     const parsed = ToolDefinitions.EdgeVideoCreateSchema.parse(args);
                     const res = await tools.handleEdgeVideoCreate(parsed);
-                    return { content: [{ type: 'text', text: JSON.stringify(res, null, 2) }] };
+                    // Compact plain-text result: small on-device models and the Gallery app handle this
+                    // far more reliably than a large nested JSON blob.
+                    const summary = `Video created successfully: ${res.videoFileName} ` +
+                        `(${res.durationSeconds}s, ${res.resolution}, ${res.fileSizeMb} MB, ${res.shotsCount} shots). ` +
+                        `Saved at: ${res.videoPath}`;
+                    return { content: [{ type: 'text', text: summary }], isError: false };
                 }
                 case 'edge_storyboard_plan': {
                     const parsed = ToolDefinitions.EdgeStoryboardPlanSchema.parse(args);

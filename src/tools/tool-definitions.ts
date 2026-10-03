@@ -78,16 +78,20 @@ export class ToolDefinitions {
 
   public async handleEdgeVideoCreate(args: z.infer<typeof ToolDefinitions.EdgeVideoCreateSchema>) {
     const telemetry = await this.deviceManager.getTelemetry();
-    const isConstrained = telemetry.thermalStatus === 'serious' || (telemetry.batteryLevel ?? 100) < 20;
+
+    // The Google AI Edge Gallery app aborts MCP calls that take too long (~60s).
+    // Always render a fast 720p / 24fps clip and cap the duration so the call returns in time.
+    const MAX_FAST_DURATION_SECONDS = 8;
+    const duration = Math.min(args.targetDurationSeconds, MAX_FAST_DURATION_SECONDS);
 
     // 1. Plan Storyboard
     const storyboard = StoryboardDirector.planStoryboard({
       prompt: args.prompt,
       title: args.title,
       aspectRatio: args.aspectRatio as AspectRatio,
-      targetDurationSeconds: args.targetDurationSeconds,
+      targetDurationSeconds: duration,
       style: args.style,
-      isMobileConstrained: isConstrained
+      isMobileConstrained: true
     });
 
     // 2. Render Video
