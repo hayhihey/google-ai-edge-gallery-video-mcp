@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "serve:sse": "node dist/index.js --sse",
     "dev": "tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
